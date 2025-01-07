@@ -11,25 +11,25 @@ def dropdownSelectHousepart():
     
 ### SCALING ###
 def sliderScaleX( ):
-    cmds.select( 'base' )
+    cmds.select( 'geo' )
     Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
     cmds.scale(Largeur, 1, 1)
     print(Largeur)
     
 def sliderScaleY( ):
-    cmds.select( 'base' )
+    cmds.select( 'geo' )
     Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
     cmds.scale(1, Hauteur, 1)
     print(Hauteur)
     
 def sliderScaleZ( ):
-    cmds.select( 'base' )
+    cmds.select( 'geo' )
     Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
     cmds.scale(1, 1, Longueur)
     print(Longueur)
     
 def scaleXYZ():
-    cmds.select( 'base' )
+    cmds.select( 'geo' )
     Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
     Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
     Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
