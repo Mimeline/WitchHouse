@@ -1,6 +1,21 @@
 import maya.cmds as cmds
 import maya.mel
 
+new_texture_path = ""
+myTextures = dict()
+myTextureName = "my_imported_texture"
+nbImportedTexture = 0
+
+def get_new_texture():
+    new_texture_path = cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/")
+    return new_texture_path
+    
+def save_new_texture(): 
+    new_texture_path = get_new_texture()
+    newKey = myTextureName + str(nbImportedTexture)
+    myTextures[newKey] = new_texture_path
+    print(myTextures)
+    
 def get_maya_main_window():
     """Renvoit la fenetre principale de Maya."""
     return maya.mel.eval('$tmpVar=$gMainWindow') 
@@ -69,7 +84,7 @@ pathbrick1 = get_texture_path("textures/brick1.png")
 pathbrick2 = get_texture_path("textures/brick2.png")
 pathroof1 = get_texture_path("textures/tiles1.png")
 pathroof2 = get_texture_path("textures/tiles2.png")        
-    
+
 def modifyTexture(textureParam):
     # Types de shaders
     shaderTypes = ["lambert"]
@@ -130,11 +145,10 @@ cmds.menuItem(label="Option 1", parent=custom_menu)
 cmds.menuItem(label="Option 2", parent=custom_menu)
 
 
-
 main_layout = cmds.columnLayout(adjustableColumn=True)
 cmds.rowLayout(numberOfColumns=2)
 cmds.button(label='Sauvegarder',command=('cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/", fileFilter="Maya Ascii (.ma)")') )
-cmds.button(label='Importer des textures',command=('cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/", fileFilter="Maya Ascii (.ma)")') )
+cmds.button(label='Importer des textures',command=('save_new_texture()') )
 cmds.setParent("..")
 
 cmds.columnLayout()
@@ -162,11 +176,14 @@ cmds.showWindow()
 #INTERFACE MODIFICATION DES TEXTURES
 
 window = cmds.window('Modification des textures de la maison')
-cmds.columnLayout( adjustableColumn=True )
+cmds.columnLayout( "dynamicLayout", adjustableColumn=True )
 cmds.iconTextButton( style='iconAndTextVertical', image1='woodbutton.png', label='Bois 1', command='modifyTexture(pathwood1)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='woodbutton2.jpg', label='Bois 2', command='modifyTexture(pathwood2)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='Brick_wall.png', label='Brique 1', command='modifyTexture(pathbrick1)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='brick_grass.png', label='Brique 2', command='modifyTexture(pathbrick2)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='tuilerouge.png', label='Tuiles 1', command='modifyTexture(pathroof1)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Tuiles 2', command='modifyTexture(pathroof2)' )
+for a_texture in myTextures.values():
+    cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='ma texture personnalisé', command='modifyTexture(a_texture)' )
+
 cmds.showWindow( window )
