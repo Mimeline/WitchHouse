@@ -1,5 +1,14 @@
 import maya.cmds as cmds
+import maya.mel
 
+def get_maya_main_window():
+    """Renvoit la fenetre principale de Maya."""
+    return maya.mel.eval('$tmpVar=$gMainWindow') 
+    
+def dropdownSelectHousepart():
+    selected_val = cmds.optionMenu("SelectionDropdownHousepart", query=True, value=True) 
+    return selected_val   
+    
 ### SCALING ###
 def sliderScaleX( ):
     cmds.select( 'base' )
@@ -71,6 +80,8 @@ def modifyTexture(textureParam):
     # Variables pour positionnement
 
     indice = 1
+    
+    selectionMaison = dropdownSelectHousepart()
 
     for shader in shaderTypes:
         for texture in textureTypes:
@@ -99,8 +110,8 @@ def modifyTexture(textureParam):
             cmds.connectAttr(f"{file_node}.outColor", f"{shader_node}.color", force=True)
 
             # Affectation du matériau à l'objet "toit"
-            cmds.sets("toit", edit=True, forceElement=shading_group)
-
+            cmds.sets(selectionMaison, edit=True, forceElement=shading_group)
+        
             # Mise à jour des positions pour d'autres objets
 
             indice += 1
@@ -113,24 +124,39 @@ def modifyTexture(textureParam):
 sX = 1
 sY = 1 
 sZ = 1
-
 cmds.window(title='Modification des dimensions de la maison')
-cmds.columnLayout()
+custom_menu = cmds.menu("customMenu", label="Menu Personnalisé", parent="MayaWindow")
+cmds.menuItem(label="Option 1", parent=custom_menu)
+cmds.menuItem(label="Option 2", parent=custom_menu)
+
+
+
+main_layout = cmds.columnLayout(adjustableColumn=True)
+cmds.rowLayout(numberOfColumns=2)
 cmds.button(label='Sauvegarder',command=('cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/", fileFilter="Maya Ascii (.ma)")') )
 cmds.button(label='Importer des textures',command=('cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/", fileFilter="Maya Ascii (.ma)")') )
+cmds.setParent("..")
+
+cmds.columnLayout()
+
+# Créer un dropdown menu
 cmds.text(label="Selectionnez une partie de la maison :")
-cmds.optionMenu("myDropdown", label="Options", changeCommand=on_selection_changed)
-cmds.menuItem(label="Murs")
-cmds.menuItem(label="Toit")
 
-
+cmds.optionMenu("SelectionDropdownHousepart", label="Choisir une option :")
+cmds.menuItem(label="base")
+cmds.menuItem(label="toit")
+cmds.menuItem(label="porte")
+cmds.menuItem(label="fenetres")
+cmds.menuItem(label="sol")
+cmds.menuItem(label="escalier")
+cmds.menuItem(label="poutres_murs")
 
 slider_Longueur = cmds.floatSliderGrp(label='Longueur',min=1,max=50, field=True)
 slider_Hauteur = cmds.floatSliderGrp(label='Hauteur',min=1,max=50, field=True)
 slider_Largeur = cmds.floatSliderGrp(label='Largeur',min=1,max=50, field=True)
 
 cmds.button(label="Re-scale", command='scaleXYZ()')
-
+cmds.setParent("..")
 cmds.showWindow()
 
 #INTERFACE MODIFICATION DES TEXTURES
@@ -141,6 +167,6 @@ cmds.iconTextButton( style='iconAndTextVertical', image1='woodbutton.png', label
 cmds.iconTextButton( style='iconAndTextVertical', image1='woodbutton2.jpg', label='Bois 2', command='modifyTexture(pathwood2)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='Brick_wall.png', label='Brique 1', command='modifyTexture(pathbrick1)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='brick_grass.png', label='Brique 2', command='modifyTexture(pathbrick2)' )
-cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Tuiles 1', command='modifyTexture(pathroof1)' )
-cmds.iconTextButton( style='iconAndTextVertical', image1='tuilerouge.png', label='Tuiles 2', command='modifyTexture(pathroof2)' )
+cmds.iconTextButton( style='iconAndTextVertical', image1='tuilerouge.png', label='Tuiles 1', command='modifyTexture(pathroof1)' )
+cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Tuiles 2', command='modifyTexture(pathroof2)' )
 cmds.showWindow( window )
