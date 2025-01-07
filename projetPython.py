@@ -1,20 +1,24 @@
 import maya.cmds as cmds
 import maya.mel
 
+
 new_texture_path = ""
 myTextures = dict()
 myTextureName = "my_imported_texture"
 nbImportedTexture = 0
-
+truncated_path = ""
 def get_new_texture():
     new_texture_path = cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/")
     return new_texture_path
     
 def save_new_texture(): 
     new_texture_path = get_new_texture()
+    truncated_path =  new_texture_path[0].replace('/','\\')
     newKey = myTextureName + str(nbImportedTexture)
-    myTextures[newKey] = new_texture_path
-    print(myTextures)
+    myTextures[newKey] = truncated_path
+    cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Texture personnalisé', command='modifyTexture(truncated_path)', parent="dynamicLayout" )
+
+    print(new_texture_path)
     
 def get_maya_main_window():
     """Renvoit la fenetre principale de Maya."""
@@ -50,10 +54,7 @@ def scaleXYZ():
     Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
     cmds.scale(Largeur, Hauteur, Longueur)
     
-    
-    #sliderScaleX( )
-    #sliderScaleY( )
-    #sliderScaleZ( )
+
 
 ### MODIFY TEXTURE ###
 def get_texture_path(relative_texture_path):
@@ -84,8 +85,9 @@ pathbrick1 = get_texture_path("textures/brick1.png")
 pathbrick2 = get_texture_path("textures/brick2.png")
 pathroof1 = get_texture_path("textures/tiles1.png")
 pathroof2 = get_texture_path("textures/tiles2.png")        
-
+print(pathwood1)
 def modifyTexture(textureParam):
+
     # Types de shaders
     shaderTypes = ["lambert"]
 
@@ -183,7 +185,5 @@ cmds.iconTextButton( style='iconAndTextVertical', image1='Brick_wall.png', label
 cmds.iconTextButton( style='iconAndTextVertical', image1='brick_grass.png', label='Brique 2', command='modifyTexture(pathbrick2)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='tuilerouge.png', label='Tuiles 1', command='modifyTexture(pathroof1)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Tuiles 2', command='modifyTexture(pathroof2)' )
-for a_texture in myTextures.values():
-    cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='ma texture personnalisé', command='modifyTexture(a_texture)' )
 
 cmds.showWindow( window )
