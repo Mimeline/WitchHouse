@@ -1,15 +1,15 @@
 import maya.cmds as cmds
 
 def create_joint(name, position, parent=None):
-    """Creates a joint with a radius of 0.5 and parents it if needed."""
+    """Creates a joint with a radius of 0.3 and parents it if needed."""
     cmds.select(clear=True)
-    jnt = cmds.joint(name=name, position=position, radius=0.5)
+    jnt = cmds.joint(name=name, position=position, radius=0.3)
     if parent:
         cmds.parent(jnt, parent)
     return jnt
 
 def create_quadruped_skeleton():
-    """Creates a basic quadruped skeleton with automatic mirroring and correct hierarchy."""
+    """Creates a basic quadruped skeleton with correct hierarchy, including a tail."""
 
     cmds.select(clear=True)
 
@@ -19,6 +19,12 @@ def create_quadruped_skeleton():
     spine_top = create_joint("spine_top_JNT", (0, 2.4, 0.8), spine_mid)
     neck = create_joint("neck_JNT", (0, 3.2, 1.3), spine_top)
     head = create_joint("head_JNT", (0, 3.2, 2), neck)
+
+    # Tail with 4 joints
+    tail_01 = create_joint("tail_01_JNT", (0, 2.94, -2.28), spine_root)
+    tail_02 = create_joint("tail_02_JNT", (0, 3.4, -2.33), tail_01)
+    tail_03 = create_joint("tail_03_JNT", (0, 4.2, -2.36), tail_02)
+    tail_04 = create_joint("tail_04_JNT", (0, 5, -2.36), tail_03)
 
     # Front legs (left side)
     shoulder_L = create_joint("shoulder_L_JNT", (0.4, 1.9, 0.8), spine_top)
@@ -30,7 +36,7 @@ def create_quadruped_skeleton():
     knee_L = create_joint("knee_L_JNT", (0.4, 0.9, -1.7), hip_L)
     pawBack_L = create_joint("pawBack_L_JNT", (0.4, 0.2, -1.4), knee_L) 
     
-# Mirroring for the right side with proper parenting
+    # Mirroring for the right side with proper parenting
     shoulder_R = mirror_joint(shoulder_L, "spine_top_JNT")
     elbow_R = mirror_joint(elbow_L, shoulder_R)
     paw_R = mirror_joint(paw_L, elbow_R)
@@ -39,7 +45,7 @@ def create_quadruped_skeleton():
     knee_R = mirror_joint(knee_L, hip_R)
     pawBack_R = mirror_joint(pawBack_L, knee_R)
 
-    print("Quadruped skeleton created with correct hierarchy!")
+    print("Quadruped skeleton with 4-joint tail created successfully!")
 
 def mirror_joint(source, parent):
     """Creates a mirrored joint for the right side (_R) with proper parenting."""
