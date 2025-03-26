@@ -1,25 +1,22 @@
 import maya.cmds as cmds
 import maya.mel
 
-
 new_texture_path = ""
 myTextures = dict()
 myTextureName = "my_imported_texture"
 nbImportedTexture = 0
-truncated_path = ""
+lightInitialPos = 0
 def get_new_texture():
     new_texture_path = cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/")
     return new_texture_path
     
 def save_new_texture(): 
     new_texture_path = get_new_texture()
-    truncated_path =  str(new_texture_path[0].replace('/','\\'))
     newKey = myTextureName + str(nbImportedTexture)
-    #myTextures[newKey] = truncated_path
-    print(truncated_path)
-    cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Texture personnalisé', command='modifyTexture(truncated_path)', parent="dynamicLayout" )
+    myTextures[newKey] = new_texture_path
+    cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Texture personnalisé', command='modifyTexture(new_texture_path)', parent="dynamicLayout" )
 
-    
+    print(myTextures)
     
 def get_maya_main_window():
     """Renvoit la fenetre principale de Maya."""
@@ -56,6 +53,14 @@ def scaleXYZ():
     cmds.scale(Largeur, Hauteur, Longueur)
     
 
+def moveLight():
+    cmds.select('directionalLight1')
+    heure = cmds.floatSliderGrp(slider_Lumiere, query=True, value=True)
+    cmds.rotate(0,heure, 0)
+    print(heure)
+    
+
+    
 
 ### MODIFY TEXTURE ###
 def get_texture_path(relative_texture_path):
@@ -88,7 +93,6 @@ pathroof1 = get_texture_path("textures/tiles1.png")
 pathroof2 = get_texture_path("textures/tiles2.png")        
 
 def modifyTexture(textureParam):
-    print("chemin de la texture" + textureParam)
     # Types de shaders
     shaderTypes = ["lambert"]
 
@@ -142,6 +146,7 @@ def modifyTexture(textureParam):
 sX = 1
 sY = 1 
 sZ = 1
+lightCreated = False 
 cmds.window(title='Modification des dimensions de la maison')
 custom_menu = cmds.menu("customMenu", label="Menu Personnalisé", parent="MayaWindow")
 cmds.menuItem(label="Option 1", parent=custom_menu)
@@ -176,6 +181,29 @@ cmds.button(label="Re-scale", command='scaleXYZ()')
 cmds.setParent("..")
 cmds.showWindow()
 
+windowlight = cmds.window('Modification de la lumière')
+cmds.columnLayout( "dynamicLayout", adjustableColumn=True )
+
+slider_Lumiere = cmds.floatSliderGrp(label='Lumiere',min=-100,max=100, field=True)
+cmds.button(label="set time", command='moveLight()')
+
+
+# Create a directional light
+light = cmds.directionalLight(rotation=(45, 30, 15))
+
+# Change the light intensity
+cmds.directionalLight( light, e=True, intensity=0.9 )
+
+# Query it
+cmds.directionalLight( light, q=True, intensity=True )
+# Result:0.5#
+
+cmds.move(-14,0,0)
+cmds.rotate(-117,0,0)
+cmds.showWindow()
+if(cmds.objExists('directionalLight1')):
+    cmds.move(2, 2, -4, "directionalLight1.rotatePivot", absolute=True)
+
 #INTERFACE MODIFICATION DES TEXTURES
 
 window = cmds.window('Modification des textures de la maison')
@@ -186,5 +214,6 @@ cmds.iconTextButton( style='iconAndTextVertical', image1='Brick_wall.png', label
 cmds.iconTextButton( style='iconAndTextVertical', image1='brick_grass.png', label='Brique 2', command='modifyTexture(pathbrick2)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='tuilerouge.png', label='Tuiles 1', command='modifyTexture(pathroof1)' )
 cmds.iconTextButton( style='iconAndTextVertical', image1='tuilebleu.png', label='Tuiles 2', command='modifyTexture(pathroof2)' )
+
 
 cmds.showWindow( window )
