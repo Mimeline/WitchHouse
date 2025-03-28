@@ -98,7 +98,7 @@ def create_quadruped_skeleton():
                   shoulder_R, elbow_R, paw_R, hip_R, knee_R, pawBack_R]
 
     bind_skin("Bear", all_joints)
-    print("Quadruped rig complete! Master control added! ✅")
+    print("Quadruped rig complete! Master control added! ")
 
 def mirror_joint(source, parent):
     pos = cmds.xform(source, query=True, worldSpace=True, translation=True)
