@@ -43,21 +43,26 @@ def bind_skin(mesh, joints):
 def create_quadruped_skeleton():
     cmds.select(clear=True)
 
-    master_ctrl = create_control("master_CTRL", (0, 0, 0.5), radius=5.0)
+    master_ctrl = create_control("master_CTRL", (0, 0, 0), radius=3.0)
     
-    spine_root = create_joint("spine_root_JNT", (0, 4.5, -2), parent=master_ctrl)
-    spine_mid = create_joint("spine_mid_JNT", (0, 3.6, 0.5), spine_root)
-    spine_top = create_joint("spine_top_JNT", (0, 3.4, 2.2), spine_mid)
-    neck = create_joint("neck_JNT", (0, 3.2, 3.3), spine_top)
-    head = create_joint("head_JNT", (0, 3.4, 4.5), neck)
+    spine_root = create_joint("spine_root_JNT", (0, 2.3, -2), parent=master_ctrl)
+    spine_mid = create_joint("spine_mid_JNT", (0, 2.4, -0.5), spine_root)
+    spine_top = create_joint("spine_top_JNT", (0, 2.4, 0.8), spine_mid)
+    neck = create_joint("neck_JNT", (0, 3.2, 1.3), spine_top)
+    head = create_joint("head_JNT", (0, 3.2, 2), neck)
+    
+    tail_01 = create_joint("tail_01_JNT", (0, 2.94, -2.28), spine_root)
+    tail_02 = create_joint("tail_02_JNT", (0, 3.4, -2.33), tail_01)
+    tail_03 = create_joint("tail_03_JNT", (0, 4.2, -2.36), tail_02)
+    tail_04 = create_joint("tail_04_JNT", (0, 5, -2.36), tail_03)
 
-    shoulder_L = create_joint("shoulder_L_JNT", (1.4, 2.3, 2.3), spine_top)
-    elbow_L = create_joint("elbow_L_JNT", (1.2, 1.2, 3), shoulder_L)
-    paw_L = create_joint("paw_L_JNT", (1.2, 0.3, 4), elbow_L)
+    shoulder_L = create_joint("shoulder_L_JNT", (0.4, 1.9, 0.8), spine_top)
+    elbow_L = create_joint("elbow_L_JNT", (0.3, 0.8, 0.6), shoulder_L)
+    paw_L = create_joint("paw_L_JNT", (0.3, 0.2, 0.7), elbow_L)
 
-    hip_L = create_joint("hip_L_JNT", (1.5, 3.5, -1.5), spine_root)
-    knee_L = create_joint("knee_L_JNT", (1.5, 1.3, -3.2), hip_L)
-    pawBack_L = create_joint("pawBack_L_JNT", (1.7, 0.3, -2.6), knee_L)
+    hip_L = create_joint("hip_L_JNT", (0.5, 1.8, -1.7), spine_root)
+    knee_L = create_joint("knee_L_JNT", (0.4, 0.9, -1.7), hip_L)
+    pawBack_L = create_joint("pawBack_L_JNT", (0.4, 0.2, -1.4), knee_L)
 
     shoulder_R = mirror_joint(shoulder_L, spine_top)
     elbow_R = mirror_joint(elbow_L, shoulder_R)
@@ -95,9 +100,10 @@ def create_quadruped_skeleton():
 
     all_joints = [spine_root, spine_mid, spine_top, neck, head,
                   shoulder_L, elbow_L, paw_L, hip_L, knee_L, pawBack_L,
-                  shoulder_R, elbow_R, paw_R, hip_R, knee_R, pawBack_R]
+                  shoulder_R, elbow_R, paw_R, hip_R, knee_R, pawBack_R, 
+                  tail_01, tail_02, tail_03, tail_04]
 
-    bind_skin("Rabbit", all_joints)
+    bind_skin("Cat", all_joints)
     print("Quadruped rig complete! Master control added! ")
 
 def mirror_joint(source, parent):
