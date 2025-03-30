@@ -1,5 +1,105 @@
 import maya.cmds as cmds
 import maya.mel
+import random 
+import CodeRig 
+
+def generate_forest():
+    plane_size = 50
+    #Executez le code suivant sur Arbre.mb afin de faire revenir le printemps 
+    cmds.polySphere(n = 'caillou', r = 0.2)
+    #cmds.scale(0.2,0.2,0.2)    
+    cmds.polyPlane()
+    cmds.scale(plane_size,0,plane_size)
+    nbv = len(cmds.ls('caillou.vtx[*]',flatten=True))
+    
+    # Selection de vertices dans un boucle
+    """for i in range(nbv):
+        cmds.select('pSphere1.vtx['+str(i)+']')
+        cmds.move(0.000001,0,0, r=True)"""
+    # Connaitre le nombre de vertices d'un objet
+    # avec la fonction len
+    
+    
+    # Déformation de la sphère
+    coef = 20
+    nbv = len(cmds.ls('caillou.vtx[*]',flatten=True))
+    for i in range(nbv):
+        if(i % 2 == 0):
+            cmds.select('caillou.vtx['+str(i)+']')
+            p1 = [random.random()/coef,random.random()/coef,random.random()/coef]
+            print(p1)
+            cmds.move(p1[0],0,0, r=True)
+    
+    
+    #deformation du sol 
+    coef = 50
+    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
+    for i in range(nbv):
+        cmds.select('pPlane1.vtx['+str(i)+']')
+        p1 = [random.random()/coef,random.random()/coef,random.random()/coef]
+        print(p1)
+        cmds.move(0,(random.random()/3) , 0 , r=True)
+    
+    # Placement d'objets sur un objet
+    coef = 0.3
+    
+    cmds.delete('pPlane1', ch=True) 
+    
+    for i in range(nbv):
+        v = random.random()
+        if v<coef:
+            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
+            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
+            cmds.select(cmds.duplicate('caillou'))
+            cmds.move(p[0] - 3,p[1] ,p[2])   
+                    
+    #creation du feuillage    
+    cmds.polySphere(n = 'feuille', r = 0.2)
+    cmds.scale(0.5,0.09,2)
+    
+    coef = 0.3
+    
+    
+    
+    for i in range(nbv):
+        for k in range(4,7):
+            v = random.random()
+            if v<coef:
+                p = cmds.xform('branche' + str(k) + '.f['+str(i)+']', q=True,t=True, ws=True)
+                p2 = cmds.xform('branche' + str(k) + '.f['+str(i)+']', q=True,t=True, r = True)
+                cmds.select(cmds.duplicate('feuille'))
+                cmds.move(p[0],p[1] ,p[2])   
+                print(random.random())
+                cmds.rotate( random.random() * 1000, random.random() * 1000, random.random() * 1000)
+    
+
+def generate_animals():
+    print("animeaux générés")
+    # Définis le dossier où sont stockés les modèles
+    MODE_FOLDER = "Modelisation"  # Remplace par ton chemin
+    
+    # Liste tous les fichiers dans le dossier
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.endswith(('.mb'))]
+    for model in model_files:
+        model_path = os.path.join(MODE_FOLDER, model)
+        
+        # Importer le fichier dans la scène Maya
+        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
+    
+        # Récupérer le dernier objet importé
+        imported_objects = cmds.ls(selection=True)
+        
+        if imported_objects:
+            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
+            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
+            x_offset += 10  # Augmenter l'offset pour le prochain modèle
+
+    
+def get_vertex_positions(obj_name):
+    vertices = cmds.ls(f"{obj_name}.vtx[*]", flatten=True)  # Liste des vertex
+    positions = [cmds.pointPosition(vtx, world=True) for vtx in vertices]  # Coordonnées en espace monde
+    return positions
+
 
 new_texture_path = ""
 myTextures = dict()
@@ -140,7 +240,9 @@ def modifyTexture(textureParam):
 
 
 
-        
+generate_forest()      
+generate_animals()  
+print(get_vertex_positions("sol"))
         
 #INTERFACE
 sX = 1
