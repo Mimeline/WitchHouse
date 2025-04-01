@@ -160,5 +160,4 @@ def create_witch_house_ui():
     cmds.showWindow(window)
 
 # Run the UI
-#generate_forest()
 create_witch_house_ui()
