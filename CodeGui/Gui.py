@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+import projetPythonFonctions
 
 def create_witch_house_ui():
     if cmds.window("witchHouseWindow", exists=True):
@@ -41,7 +42,7 @@ def create_witch_house_ui():
     cmds.setParent("..")
     cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
     cmds.text(label='')
-    cmds.button(label="Rocks", w=100)
+    cmds.button(label="Rocks", w=100, command='generate_forest(10,1,2,0)')
     cmds.text(label='')
     cmds.setParent("..")
     
@@ -83,7 +84,7 @@ def create_witch_house_ui():
 
     cmds.rowColumnLayout(nc=2, cw=[(1,250),(2,150)])
     cmds.button(
-        label='Generate House')
+        label='Generate House', command='scaleXYZ("geo", 0, 0, 0 )')
     cmds.button(label = 'Reset')
     cmds.setParent("..")
     
@@ -104,7 +105,7 @@ def create_witch_house_ui():
         cmds.setParent("..")
         cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
         cmds.text(label='')
-        cmds.button(label=emoji, w=100)
+        cmds.button(label=emoji, w=100, command='generate_pumpkins(10,1,2,0)')
         cmds.text(label='')
         cmds.setParent("..")
         cmds.separator(height=10, style='double')

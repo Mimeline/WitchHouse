@@ -1,9 +1,48 @@
 import maya.cmds as cmds
 import maya.mel
-import random 
+import random
+import CodeGui
 import CodeRig 
 
-def generate_forest():
+
+def generate_pumpkins(nb_pumpkins, min_scale, max_scale, rotation):
+    coef = 0.3
+    plane_size = 50
+
+
+    # Définis le dossier où sont stockés les modèles
+    MODE_FOLDER = "Modelisation\Assets décoratifs"  # Remplace par ton chemin
+    
+    # Liste tous les fichiers dans le dossier
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.endswith(('Citrouille.mb'))]
+    for model in model_files:
+        model_path = os.path.join(MODE_FOLDER, model)
+        
+        # Importer le fichier dans la scène Maya
+        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
+    
+        # Récupérer le dernier objet importé
+        imported_objects = cmds.ls(selection=True)
+        
+        if imported_objects:
+            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
+            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
+            x_offset += 10  # Augmenter l'offset pour le prochain modèle
+            
+    cmds.delete('pPlane1', ch=True) 
+    random_scaleX = min_scale + (random.random()* max_scale)
+    random_scaleY = min_scale + (random.random()* max_scale)
+    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
+    for i in range(nbv):
+        v = random.random()
+        if v<coef:
+            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
+            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
+            cmds.select(cmds.duplicate('caillou'))
+            cmds.scale(plane_size,0,plane_size)
+            cmds.move(p[0] - 3,p[1] ,p[2])                   
+
+def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     plane_size = 50
     #Executez le code suivant sur Arbre.mb afin de faire revenir le printemps 
     cmds.polySphere(n = 'caillou', r = 0.2)
@@ -29,6 +68,7 @@ def generate_forest():
             p1 = [random.random()/coef,random.random()/coef,random.random()/coef]
             print(p1)
             cmds.move(p1[0],0,0, r=True)
+            
     
     
     #deformation du sol 
@@ -44,7 +84,8 @@ def generate_forest():
     coef = 0.3
     
     cmds.delete('pPlane1', ch=True) 
-    
+    random_scaleX = min_scale + (random.random()* max_scale)
+    random_scaleY = min_scale + (random.random()* max_scale  )
     for i in range(nbv):
         v = random.random()
         if v<coef:
@@ -127,30 +168,35 @@ def dropdownSelectHousepart():
     return selected_val   
     
 ### SCALING ###
-def sliderScaleX( ):
-    cmds.select( 'geo' )
+"""
+def sliderScaleX( selectedGeo ):
+    cmds.select( selectedGeo )
     Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
     cmds.scale(Largeur, 1, 1)
     print(Largeur)
     
-def sliderScaleY( ):
-    cmds.select( 'geo' )
+def sliderScaleY( selectedGeo ):
+    cmds.select( selectedGeo )
     Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
     cmds.scale(1, Hauteur, 1)
     print(Hauteur)
     
-def sliderScaleZ( ):
-    cmds.select( 'geo' )
+def sliderScaleZ( selectedGeo ):
+    cmds.select( selectedGeo )
     Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
     cmds.scale(1, 1, Longueur)
     print(Longueur)
-    
-def scaleXYZ():
-    cmds.select( 'geo' )
+"""    
+def scaleXYZ(selectedGeo, x_scale, y_scale, z_scale):
+    print("scaling")
+    cmds.select( selectedGeo )
+    """
     Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
     Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
     Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
-    cmds.scale(Largeur, Hauteur, Longueur)
+    """
+    
+    cmds.scale(x_scale, y_scale, z_scale)
     
 
 def moveLight():
@@ -239,9 +285,9 @@ def modifyTexture(textureParam):
             indice += 1
 
 
-
-generate_forest()      
-generate_animals()  
+create_witch_house_ui()
+#generate_forest()      
+#generate_animals()  
 print(get_vertex_positions("sol"))
         
 #INTERFACE
@@ -275,11 +321,13 @@ cmds.menuItem(label="sol")
 cmds.menuItem(label="escalier")
 cmds.menuItem(label="poutres_murs")
 
+"""
 slider_Longueur = cmds.floatSliderGrp(label='Longueur',min=1,max=50, field=True)
 slider_Hauteur = cmds.floatSliderGrp(label='Hauteur',min=1,max=50, field=True)
 slider_Largeur = cmds.floatSliderGrp(label='Largeur',min=1,max=50, field=True)
+"""
 
-cmds.button(label="Re-scale", command='scaleXYZ()')
+cmds.button(label="Re-scale", command='scaleXYZ("geo")')
 cmds.setParent("..")
 cmds.showWindow()
 
