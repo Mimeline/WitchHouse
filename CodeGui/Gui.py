@@ -71,12 +71,12 @@ def create_witch_house_ui():
     house_column = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
     cmds.text(label="Generate your house.", align='left', height = 40)
     cmds.text(label="Modify the size of base:")
-    cmds.floatSliderGrp(label="Length", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Height", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
+    cmds.floatSliderGrp(label="Length", field=True, minValue=-10, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
+    cmds.floatSliderGrp(label="Height", field=True, minValue=-10, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
+    cmds.floatSliderGrp(label="Width", field=True, minValue=-10, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
     cmds.separator(height=10, style='double')
     
-    sections = ["roof", "door", "windows", "sol", "escalier", "poutres_murs"]
+    sections = ["toit", "porte", "fenetres", "sol", "escalier", "poutres_murs"]
     houseSliders = dict()
     for section in sections:
         cmds.text(label=f"Modify the size of {section}:")
@@ -86,9 +86,9 @@ def create_witch_house_ui():
         slider_width = cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
         """
         sliders[section] = {
-        "length": cmds.floatSliderGrp(label="Length", field=True, minValue=0, maxValue=100, value=50),
-        "height": cmds.floatSliderGrp(label="Height", field=True, minValue=0, maxValue=100, value=50),
-        "width": cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50)
+        "length": cmds.floatSliderGrp(label="Length", field=True, minValue=-10, maxValue=10, value=1),
+        "height": cmds.floatSliderGrp(label="Height", field=True, minValue=-10, maxValue=10, value=1),
+        "width": cmds.floatSliderGrp(label="Width", field=True, minValue=-10, maxValue=10, value=1)
         }
         cmds.separator(height=10, style='double')
 
@@ -104,8 +104,8 @@ def create_witch_house_ui():
     
     # Tab 3: Props
     props_layout = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
-    items = [("Want some pumpkins?", "🎃"), ("Do you need broomsticks?", "🧹"), ("Some haunted ghost?", "👻")]
-    for label, emoji in items:
+    items = [("Want some pumpkins?", "🎃", "citrouille"), ("Do you need broomsticks?", "🧹", "balai"), ("Some haunted ghost?", "👻", "fantome")]
+    for label, emoji, item_name in items:
         cmds.text(label=label, align='left')
         cmds.floatSliderGrp(label="Amount", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
         cmds.floatSliderGrp(label="Min scale", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
@@ -115,7 +115,7 @@ def create_witch_house_ui():
         cmds.setParent("..")
         cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
         cmds.text(label='')
-        cmds.button(label=emoji, w=100, command='generate_object("citrouille",10,1,2,0)')
+        cmds.button(label=emoji, w=100, command=f'generate_object("{item_name}", 10, 1, 2, 0)')
         cmds.text(label='')
         cmds.setParent("..")
         cmds.separator(height=10, style='double')

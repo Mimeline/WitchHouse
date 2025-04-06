@@ -13,12 +13,12 @@ def generate_house(*args):
         width = cmds.floatSliderGrp(values["width"], q=True, value=True)
         
         # Appelle la fonction pour scaler chaque partie
-        scaleXYZ("geo", length, height, width)
-    scaleXYZ("geo", length, height, width)
+        scaleXYZ(section, length, height, width)
     
     
 def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
-    coef = 0.8
+    print("generation de" + name_object)
+    coef = 0.2
     plane_size = 50
 
     # Définis le dossier où sont stockés les modèles
@@ -49,46 +49,7 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
         if v<coef:
             p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
             p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
-            cmds.select(cmds.duplicate(name_object))
-            cmds.scale(plane_size,0,plane_size)
-            cmds.move(p[0] - 3,p[1] ,p[2])                   
-
-
-
-def generate_pumpkins(nb_pumpkins, min_scale, max_scale, rotation):
-    coef = 0.3
-    plane_size = 50
-    print("genere citrouille")
-
-    # Définis le dossier où sont stockés les modèles
-    MODE_FOLDER = "Modelisation\Assets décoratifs"  # Remplace par ton chemin
-    
-    # Liste tous les fichiers dans le dossier
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(('Citrouille'))]
-    for model in model_files:
-        model_path = os.path.join(MODE_FOLDER, model)
-        
-        # Importer le fichier dans la scène Maya
-        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False)
-    
-        # Récupérer le dernier objet importé
-        imported_objects = cmds.ls(selection=True)
-        
-        if imported_objects:
-            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
-            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
-            x_offset += 10  # Augmenter l'offset pour le prochain modèle
-            
-    cmds.delete('pPlane1', ch=True) 
-    random_scaleX = min_scale + (random.random()* max_scale)
-    random_scaleY = min_scale + (random.random()* max_scale)
-    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
-    for i in range(nbv):
-        v = random.random()
-        if v<coef:
-            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
-            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
-            cmds.select(cmds.duplicate('citrouille'))
+            cmds.select(cmds.duplicate("imported:" + name_object))
             cmds.move(p[0] - 3,p[1] ,p[2])                   
 
 def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
@@ -143,24 +104,7 @@ def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
             cmds.select(cmds.duplicate('caillou'))
             cmds.move(p[0] - 3,p[1] ,p[2])   
                     
-    #creation du feuillage    
-    cmds.polySphere(n = 'feuille', r = 0.2)
-    cmds.scale(0.5,0.09,2)
-    
-    coef = 0.3
-    
-    
-    
-    for i in range(nbv):
-        for k in range(4,7):
-            v = random.random()
-            if v<coef:
-                p = cmds.xform('branche' + str(k) + '.f['+str(i)+']', q=True,t=True, ws=True)
-                p2 = cmds.xform('branche' + str(k) + '.f['+str(i)+']', q=True,t=True, r = True)
-                cmds.select(cmds.duplicate('feuille'))
-                cmds.move(p[0],p[1] ,p[2])   
-                print(random.random())
-                cmds.rotate( random.random() * 1000, random.random() * 1000, random.random() * 1000)
+
     
 
 def generate_animals():
@@ -217,25 +161,7 @@ def dropdownSelectHousepart():
     return selected_val   
     
 ### SCALING ###
-"""
-def sliderScaleX( selectedGeo ):
-    cmds.select( selectedGeo )
-    Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
-    cmds.scale(Largeur, 1, 1)
-    print(Largeur)
-    
-def sliderScaleY( selectedGeo ):
-    cmds.select( selectedGeo )
-    Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
-    cmds.scale(1, Hauteur, 1)
-    print(Hauteur)
-    
-def sliderScaleZ( selectedGeo ):
-    cmds.select( selectedGeo )
-    Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
-    cmds.scale(1, 1, Longueur)
-    print(Longueur)
-"""    
+
 def scaleXYZ(selectedGeo, x_scale, y_scale, z_scale):
     print("scaling")
     cmds.select( selectedGeo )
