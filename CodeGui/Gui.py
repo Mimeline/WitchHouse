@@ -2,6 +2,7 @@ import maya.cmds as cmds
 import projetPythonFonctions
 
 sliders = dict()
+assetsSliders = dict()
 
 def create_witch_house_ui():
     if cmds.window("witchHouseWindow", exists=True):
@@ -77,14 +78,8 @@ def create_witch_house_ui():
     cmds.separator(height=10, style='double')
     
     sections = ["toit", "porte", "fenetres", "sol", "escalier", "poutres_murs"]
-    houseSliders = dict()
     for section in sections:
         cmds.text(label=f"Modify the size of {section}:")
-        """
-        slider_length = cmds.floatSliderGrp(label="Length", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        slider_height = cmds.floatSliderGrp(label="Height", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        slider_width = cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        """
         sliders[section] = {
         "length": cmds.floatSliderGrp(label="Length", field=True, minValue=-10, maxValue=10, value=1),
         "height": cmds.floatSliderGrp(label="Height", field=True, minValue=-10, maxValue=10, value=1),
@@ -106,11 +101,14 @@ def create_witch_house_ui():
     props_layout = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
     items = [("Want some pumpkins?", "🎃", "citrouille"), ("Do you need broomsticks?", "🧹", "balai"), ("Some haunted ghost?", "👻", "fantome")]
     for label, emoji, item_name in items:
-        cmds.text(label=label, align='left')
-        cmds.floatSliderGrp(label="Amount", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Min scale", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Max scale", field=True, minValue=0, maxValue=10, value=5, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Rotation", field=True, minValue=0, maxValue=360, value=45, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        cmds.text(label=label, align='left')   
+        assetsSliders[item_name] = {
+        "amount": cmds.floatSliderGrp(label="Amount", field=True, minValue=1, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "minScale": cmds.floatSliderGrp(label="Min scale", field=True, minValue=1, maxValue=5, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "maxScale": cmds.floatSliderGrp(label="Max scale", field=True, minValue=1, maxValue=5, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "rotation": cmds.floatSliderGrp(label="Rotation", field=True, minValue=1, maxValue=360, value=45, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        }
+        
         cmds.rowLayout(numberOfColumns=1, columnAlign=(1, "center"))
         cmds.setParent("..")
         cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  

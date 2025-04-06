@@ -1,8 +1,8 @@
 import maya.cmds as cmds
 import maya.mel
 import random
-import CodeGui
-import CodeRig 
+#import CodeGui
+#import CodeRig 
 
 
 def generate_house(*args):
@@ -20,9 +20,21 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
     print("generation de" + name_object)
     coef = 0.2
     plane_size = 50
-
+    minScale = 1
+    maxScale = 1
+    nbObjects = 1
+    rotationAmount = 1
+    
+    for section, values in assetsSliders.items():
+        print(section + " " + name_object)
+        if section == name_object: 
+            minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
+            maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
+            nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
+            rotationAmount = cmds.floatSliderGrp(values["rotation"], q=True, value=True)
+            print("sliders values " + str(minScale) + " " + str(maxScale) + " " + str(nbObjects) + " " + str(rotationAmount))
     # Définis le dossier où sont stockés les modèles
-    MODE_FOLDER = "Modelisation\Assets décoratifs"  # Remplace par ton chemin
+    MODE_FOLDER = "Modelisation\AssetsDecoratifs"  # Remplace par ton chemin
     
     # Liste tous les fichiers dans le dossier
     model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith((name_object + ".mb"))]
@@ -41,8 +53,7 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
             x_offset += 10  # Augmenter l'offset pour le prochain modèle
             
     cmds.delete('pPlane1', ch=True) 
-    random_scaleX = min_scale + (random.random()* max_scale)
-    random_scaleY = min_scale + (random.random()* max_scale)
+    random_scale = minScale + (random.random()* maxScale)
     nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
     for i in range(nbv):
         v = random.random()
@@ -50,6 +61,7 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
             p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
             p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
             cmds.select(cmds.duplicate("imported:" + name_object))
+            cmds.scale(random_scale,random_scale,random_scale)
             cmds.move(p[0] - 3,p[1] ,p[2])                   
 
 def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
@@ -60,14 +72,6 @@ def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     cmds.polyPlane()
     cmds.scale(plane_size,0,plane_size)
     nbv = len(cmds.ls('caillou.vtx[*]',flatten=True))
-    
-    # Selection de vertices dans un boucle
-    """for i in range(nbv):
-        cmds.select('pSphere1.vtx['+str(i)+']')
-        cmds.move(0.000001,0,0, r=True)"""
-    # Connaitre le nombre de vertices d'un objet
-    # avec la fonction len
-    
     
     # Déformation de la sphère
     coef = 20
@@ -140,6 +144,7 @@ myTextures = dict()
 myTextureName = "my_imported_texture"
 nbImportedTexture = 0
 lightInitialPos = 0
+
 def get_new_texture():
     new_texture_path = cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/")
     return new_texture_path
@@ -165,12 +170,6 @@ def dropdownSelectHousepart():
 def scaleXYZ(selectedGeo, x_scale, y_scale, z_scale):
     print("scaling")
     cmds.select( selectedGeo )
-    """
-    Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
-    Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
-    Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
-    """
-    
     cmds.scale(x_scale, y_scale, z_scale)
     
 
@@ -261,8 +260,7 @@ def modifyTexture(textureParam):
 
 
 create_witch_house_ui()
-#generate_forest()      
-#generate_animals()  
+
 print(get_vertex_positions("sol"))
         
 #INTERFACE
