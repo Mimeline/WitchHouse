@@ -5,16 +5,27 @@ import CodeGui
 import CodeRig 
 
 
-def generate_pumpkins(nb_pumpkins, min_scale, max_scale, rotation):
-    coef = 0.3
+def generate_house(*args):
+    print("generation de la maison")
+    for section, values in sliders.items():
+        length = cmds.floatSliderGrp(values["length"], q=True, value=True)
+        height = cmds.floatSliderGrp(values["height"], q=True, value=True)
+        width = cmds.floatSliderGrp(values["width"], q=True, value=True)
+        
+        # Appelle la fonction pour scaler chaque partie
+        scaleXYZ("geo", length, height, width)
+    scaleXYZ("geo", length, height, width)
+    
+    
+def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
+    coef = 0.8
     plane_size = 50
-
 
     # Définis le dossier où sont stockés les modèles
     MODE_FOLDER = "Modelisation\Assets décoratifs"  # Remplace par ton chemin
     
     # Liste tous les fichiers dans le dossier
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.endswith(('Citrouille.mb'))]
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith((name_object + ".mb"))]
     for model in model_files:
         model_path = os.path.join(MODE_FOLDER, model)
         
@@ -38,8 +49,46 @@ def generate_pumpkins(nb_pumpkins, min_scale, max_scale, rotation):
         if v<coef:
             p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
             p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
-            cmds.select(cmds.duplicate('caillou'))
+            cmds.select(cmds.duplicate(name_object))
             cmds.scale(plane_size,0,plane_size)
+            cmds.move(p[0] - 3,p[1] ,p[2])                   
+
+
+
+def generate_pumpkins(nb_pumpkins, min_scale, max_scale, rotation):
+    coef = 0.3
+    plane_size = 50
+    print("genere citrouille")
+
+    # Définis le dossier où sont stockés les modèles
+    MODE_FOLDER = "Modelisation\Assets décoratifs"  # Remplace par ton chemin
+    
+    # Liste tous les fichiers dans le dossier
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(('Citrouille'))]
+    for model in model_files:
+        model_path = os.path.join(MODE_FOLDER, model)
+        
+        # Importer le fichier dans la scène Maya
+        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False)
+    
+        # Récupérer le dernier objet importé
+        imported_objects = cmds.ls(selection=True)
+        
+        if imported_objects:
+            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
+            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
+            x_offset += 10  # Augmenter l'offset pour le prochain modèle
+            
+    cmds.delete('pPlane1', ch=True) 
+    random_scaleX = min_scale + (random.random()* max_scale)
+    random_scaleY = min_scale + (random.random()* max_scale)
+    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
+    for i in range(nbv):
+        v = random.random()
+        if v<coef:
+            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
+            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
+            cmds.select(cmds.duplicate('citrouille'))
             cmds.move(p[0] - 3,p[1] ,p[2])                   
 
 def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
@@ -85,7 +134,7 @@ def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     
     cmds.delete('pPlane1', ch=True) 
     random_scaleX = min_scale + (random.random()* max_scale)
-    random_scaleY = min_scale + (random.random()* max_scale  )
+    random_scaleY = min_scale + (random.random()* max_scale)
     for i in range(nbv):
         v = random.random()
         if v<coef:

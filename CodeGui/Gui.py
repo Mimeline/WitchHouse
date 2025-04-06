@@ -1,6 +1,8 @@
 import maya.cmds as cmds
 import projetPythonFonctions
 
+sliders = dict()
+
 def create_witch_house_ui():
     if cmds.window("witchHouseWindow", exists=True):
         cmds.deleteUI("witchHouseWindow")
@@ -75,16 +77,24 @@ def create_witch_house_ui():
     cmds.separator(height=10, style='double')
     
     sections = ["roof", "door", "windows", "sol", "escalier", "poutres_murs"]
+    houseSliders = dict()
     for section in sections:
         cmds.text(label=f"Modify the size of {section}:")
-        cmds.floatSliderGrp(label="Length", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Height", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        """
+        slider_length = cmds.floatSliderGrp(label="Length", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        slider_height = cmds.floatSliderGrp(label="Height", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        slider_width = cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        """
+        sliders[section] = {
+        "length": cmds.floatSliderGrp(label="Length", field=True, minValue=0, maxValue=100, value=50),
+        "height": cmds.floatSliderGrp(label="Height", field=True, minValue=0, maxValue=100, value=50),
+        "width": cmds.floatSliderGrp(label="Width", field=True, minValue=0, maxValue=100, value=50)
+        }
         cmds.separator(height=10, style='double')
 
     cmds.rowColumnLayout(nc=2, cw=[(1,250),(2,150)])
     cmds.button(
-        label='Generate House', command='scaleXYZ("geo", 0, 0, 0 )')
+        label='Generate House', command='generate_house()')
     cmds.button(label = 'Reset')
     cmds.setParent("..")
     
@@ -105,7 +115,7 @@ def create_witch_house_ui():
         cmds.setParent("..")
         cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
         cmds.text(label='')
-        cmds.button(label=emoji, w=100, command='generate_pumpkins(10,1,2,0)')
+        cmds.button(label=emoji, w=100, command='generate_object("citrouille",10,1,2,0)')
         cmds.text(label='')
         cmds.setParent("..")
         cmds.separator(height=10, style='double')
