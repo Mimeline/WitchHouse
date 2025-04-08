@@ -1,5 +1,10 @@
 import maya.cmds as cmds
 import projetPythonFonctions
+import sys
+import os
+# Ajouter le chemin du dossier racine du projet à sys.path
+current_directory = os.getcwd()  # Obtenir le répertoire courant
+sys.path.append(current_directory)  # Ajouter la racine du projet à sys.path
 
 forestSliders = dict()
 sliders = dict()
@@ -60,15 +65,19 @@ def create_witch_house_ui():
     
     cmds.separator(height=10, style='double')
     cmds.text(label="Place some grass:", align='left')
-    cmds.floatSliderGrp(label="Amount", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Min scale", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Max scale", field=True, minValue=0, maxValue=10, value=5, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Rotation", field=True, minValue=0, maxValue=360, value=45, columnWidth=[(1, 120), (2, 50), (3, 200)])
+    
+    assetsSliders["grass"] = {
+        "amount": cmds.floatSliderGrp(label="Amount", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "minScale": cmds.floatSliderGrp(label="Min scale", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "maxScale": cmds.floatSliderGrp(label="Max scale", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "rotation": cmds.floatSliderGrp(label="Rotation", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
+    }
+    
     cmds.rowLayout(numberOfColumns=1, columnAlign=(1, "center"))
     cmds.setParent("..")
     cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
     cmds.text(label='')
-    cmds.button(label="Grass", w=100)
+    cmds.button(label="Grass", w=100,command='generate_object("grass", 10, 1, 2, 0)')
     cmds.text(label='')
     cmds.setParent("..")
     

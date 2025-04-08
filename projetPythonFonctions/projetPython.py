@@ -2,6 +2,11 @@ import maya.cmds as cmds
 import maya.mel
 import random
 import os
+import sys
+
+# Ajouter le chemin du dossier racine du projet à sys.path
+current_directory = os.getcwd()  # Obtenir le répertoire courant
+sys.path.append(current_directory)  # Ajouter la racine du projet à sys.path
 
 #import CodeGui
 #import CodeRig 
@@ -58,6 +63,7 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
 
             # Choisir une face aléatoire
             random_face = random.choice(plane_faces)
+            print("random choice" + random_face)
             face_position = cmds.xform(random_face, q=True, t=True, ws=True)
 
             for obj in imported_transforms:
@@ -357,7 +363,7 @@ def modifyTexture(textureParam):
             indice += 1
 
 
-create_witch_house_ui()
+#create_witch_house_ui()
 
 print(get_vertex_positions("sol"))
         
