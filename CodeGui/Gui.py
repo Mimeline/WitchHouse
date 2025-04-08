@@ -1,10 +1,13 @@
 import maya.cmds as cmds
 import projetPythonFonctions
 
+forestSliders = dict()
 sliders = dict()
 assetsSliders = dict()
+animalSliders = dict()
 
 def create_witch_house_ui():
+    global shape_radio_collection, round_btn, square_btn
     if cmds.window("witchHouseWindow", exists=True):
         cmds.deleteUI("witchHouseWindow")
     
@@ -20,18 +23,24 @@ def create_witch_house_ui():
     # Tab 1: Forest
     forest_layout = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
     cmds.text(label="Generate the field of your:", align='left', height = 40)
-    cmds.floatSliderGrp(label="Size", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Subdivid", field=True, minValue=0, maxValue=10, value=5, columnWidth=[(1, 120), (2, 50), (3, 200)])
+    
+    
+    forestSliders["ground"] = {
+        "Size": cmds.floatSliderGrp(label="Size", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "Subdivid": cmds.floatSliderGrp(label="Subdivid", field=True, minValue=0, maxValue=10, value=5, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+    }
+    
     cmds.radioCollection()
     cmds.rowColumnLayout(numberOfColumns=4, columnWidth=[(1,170),(2,3),(3,100),(4,100)])
     cmds.text(label='Shape:', align='right')
     cmds.text(label='')
-    cmds.radioButton(label='Round')
-    cmds.radioButton(label='Square')
+    shape_radio_collection = cmds.radioCollection()
+    round_btn = cmds.radioButton('round_btn',label='Round')
+    square_btn = cmds.radioButton('square_btn',label='Square')
     cmds.setParent("..")
     cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
     cmds.text(label='')
-    cmds.button(label="Field", w=100)
+    cmds.button(label="Field", w=100,command='generate_ground()')
     cmds.text(label='')
     cmds.setParent("..")
 
@@ -122,18 +131,20 @@ def create_witch_house_ui():
     
     # Tab 4: Animals
     animals_layout = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
-    items = [("Woof-woof?", "🐶"), ("Mew-mew?", "🐱")]
-    for label, emoji in items:
+    items = [("generate a bear?", "🐻", "Bear"), ("Mew-mew?", "🐱", "chat"), ("generate a bunny?", "🐰", "Bunny"), ("generate a fox?", "🦊", "Fox")]
+    for label, emoji, item_name in items:
         cmds.text(label=label, align='left')
-        cmds.floatSliderGrp(label="Amount", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Min scale", field=True, minValue=0, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Max scale", field=True, minValue=0, maxValue=10, value=5, columnWidth=[(1, 120), (2, 50), (3, 200)])
-        cmds.floatSliderGrp(label="Rotation", field=True, minValue=0, maxValue=360, value=45, columnWidth=[(1, 120), (2, 50), (3, 200)])
+        animalSliders[item_name] = {
+        "amount": cmds.floatSliderGrp(label="Amount", field=True, minValue=1, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "minScale": cmds.floatSliderGrp(label="Min scale", field=True, minValue=1, maxValue=5, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "maxScale": cmds.floatSliderGrp(label="Max scale", field=True, minValue=1, maxValue=5, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        }
+        
         cmds.rowLayout(numberOfColumns=1, columnAlign=(1, "center"))
         cmds.setParent("..")
         cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
         cmds.text(label='')
-        cmds.button(label=emoji, w=100)
+        cmds.button(label=emoji, w=100,command=f'generate_animal("{item_name}", 10, 1, 2, 0)')
         cmds.text(label='')
         cmds.setParent("..")
         cmds.separator(height=10, style='double')

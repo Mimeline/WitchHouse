@@ -1,6 +1,8 @@
 import maya.cmds as cmds
 import maya.mel
 import random
+import os
+
 #import CodeGui
 #import CodeRig 
 
@@ -63,6 +65,86 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
             cmds.select(cmds.duplicate("imported:" + name_object))
             cmds.scale(random_scale,random_scale,random_scale)
             cmds.move(p[0] - 3,p[1] ,p[2])                   
+
+
+def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation):
+    print("generation de" + name_object)
+    coef = 0.2
+    plane_size = 50
+    minScale = 1
+    maxScale = 1
+    nbObjects = 1
+    rotationAmount = 1
+    
+    for section, values in animalSliders.items():
+        print(section + " " + name_object)
+        if section == name_object: 
+            minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
+            maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
+            nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
+            print("sliders values " + str(minScale) + " " + str(maxScale) + " " + str(nbObjects) + " " + str(rotationAmount))
+    # Définis le dossier où sont stockés les modèles
+    MODE_FOLDER = "Modelisation"  # Remplace par ton chemin
+    
+    # Liste tous les fichiers dans le dossier
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith((name_object + ".mb"))]
+    for model in model_files:
+        model_path = os.path.join(MODE_FOLDER, model)
+        
+        # Importer le fichier dans la scène Maya
+        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
+    
+        # Récupérer le dernier objet importé
+        imported_objects = cmds.ls(selection=True)
+        
+        if imported_objects:
+            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
+            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
+            x_offset += 10  # Augmenter l'offset pour le prochain modèle
+            
+    cmds.delete('pPlane1', ch=True) 
+    random_scale = minScale + (random.random()* maxScale)
+    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
+    for i in range(nbv):
+        v = random.random()
+        if v<coef:
+            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
+            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
+            cmds.select(cmds.duplicate("imported:" + name_object))
+            cmds.scale(random_scale,random_scale,random_scale)
+            cmds.move(p[0] - 3,p[1] ,p[2])                   
+
+
+
+def generate_ground():
+    global shape_radio_collection, round_btn, square_btn
+    print(">> Génération du sol")
+
+    # Vérifier si les boutons radio sont bien définis
+    try:
+        selected_shape = cmds.radioCollection(shape_radio_collection, query=True, select=True)
+        print(f"Forme sélectionnée : {selected_shape}")
+    except:
+        print("Erreur : radioCollection non définie.")
+        return
+
+    # Créer le sol en fonction de la sélection
+    ground_obj = None
+    if selected_shape == 'round_btn':
+        print("creation")
+        cmds.polyDisc()
+    else:
+        cmds.polyPlane()
+
+    plane_size = 1
+    for section in forestSliders.items():
+        if section == "ground": 
+            plane_size = cmds.floatSliderGrp(values["Size"], q=True, value=True)
+            subdivisionAmount = cmds.floatSliderGrp(values["Subdivid"], q=True, value=True)
+    # Mise à l'échelle
+    print(plane_size)
+    cmds.scale(plane_size, 1, plane_size, ground_obj)
+
 
 def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     plane_size = 50
