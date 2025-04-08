@@ -20,52 +20,61 @@ def generate_house(*args):
     
     
 def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
-    print("generation de" + name_object)
-    coef = 0.2
+    print("generation de " + name_object)
+    coef = 0.9
     plane_size = 50
     minScale = 1
     maxScale = 1
     nbObjects = 1
     rotationAmount = 1
-    
+
     for section, values in assetsSliders.items():
         print(section + " " + name_object)
-        if section == name_object: 
+        if section == name_object:
             minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
             maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
             nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
             rotationAmount = cmds.floatSliderGrp(values["rotation"], q=True, value=True)
-            print("sliders values " + str(minScale) + " " + str(maxScale) + " " + str(nbObjects) + " " + str(rotationAmount))
-    # Définis le dossier où sont stockés les modèles
-    MODE_FOLDER = "Modelisation\AssetsDecoratifs"  # Remplace par ton chemin
-    
-    # Liste tous les fichiers dans le dossier
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith((name_object + ".mb"))]
-    for model in model_files:
-        model_path = os.path.join(MODE_FOLDER, model)
-        
-        # Importer le fichier dans la scène Maya
-        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
-    
-        # Récupérer le dernier objet importé
-        imported_objects = cmds.ls(selection=True)
-        
-        if imported_objects:
-            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
-            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
-            x_offset += 10  # Augmenter l'offset pour le prochain modèle
-            
-    cmds.delete('pPlane1', ch=True) 
-    random_scale = minScale + (random.random()* maxScale)
-    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
-    for i in range(nbv):
-        v = random.random()
-        if v<coef:
-            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
-            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
-            cmds.select(cmds.duplicate("imported:" + name_object))
-            cmds.scale(random_scale,random_scale,random_scale)
-            cmds.move(p[0] - 3,p[1] ,p[2])                   
+            print("sliders values", minScale, maxScale, nbObjects, rotationAmount)
+
+    MODE_FOLDER = "Modelisation/AssetsDecoratifs"  # Utilise / ou échappe les \\
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
+    plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
+
+    for i in range(int(nbObjects)):
+        for model in model_files:
+            model_path = os.path.join(MODE_FOLDER, model)
+            ns = f"{name_object}_inst{i}"
+
+            # Importer avec un namespace unique
+            cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace=ns)
+
+            # Récupérer tous les transforms dans le namespace importé
+            imported_transforms = cmds.ls(f"{ns}:*", type="transform")
+
+            if not imported_transforms:
+                print(f"[!] Aucun transform trouvé dans {ns}")
+                continue
+
+            # Choisir une face aléatoire
+            random_face = random.choice(plane_faces)
+            face_position = cmds.xform(random_face, q=True, t=True, ws=True)
+
+            for obj in imported_transforms:
+                # Échelle aléatoire
+                scale = minScale + (random.random() * (maxScale - minScale))
+                cmds.scale(scale, scale, scale, obj)
+
+                # Position
+                cmds.move(face_position[0], face_position[1], face_position[2], obj, absolute=True)
+
+                # Rotation aléatoire (autour de Y)
+                rot = random.uniform(0, rotationAmount)
+                cmds.rotate(0, rot, 0, obj)
+
+    cmds.delete('pPlane1', ch=True)
+
+
 
 
 
