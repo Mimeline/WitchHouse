@@ -6,6 +6,7 @@ import os
 #import CodeGui
 #import CodeRig 
 
+ground = None
 
 def generate_house(*args):
     print("generation de la maison")
@@ -67,8 +68,9 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
             cmds.move(p[0] - 3,p[1] ,p[2])                   
 
 
-def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation):
-    print("generation de" + name_object)
+
+def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation): 
+    print("generation de " + name_object)
     coef = 0.2
     plane_size = 50
     minScale = 1
@@ -83,37 +85,52 @@ def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation):
             maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
             nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
             print("sliders values " + str(minScale) + " " + str(maxScale) + " " + str(nbObjects) + " " + str(rotationAmount))
-    # Définis le dossier où sont stockés les modèles
+    
+    # Définir le dossier où sont stockés les modèles
     MODE_FOLDER = "Modelisation"  # Remplace par ton chemin
     
     # Liste tous les fichiers dans le dossier
     model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith((name_object + ".mb"))]
+
+    x_offset = 0  # Variable d'offset pour déplacer les objets
+    
+    # Récupérer les faces de pPlane1
+    plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
+    
     for model in model_files:
         model_path = os.path.join(MODE_FOLDER, model)
         
         # Importer le fichier dans la scène Maya
         cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
-    
-        # Récupérer le dernier objet importé
-        imported_objects = cmds.ls(selection=True)
+        cmds.move(100,0,0)
+        # Récupérer tous les objets importés sous le namespace "imported:"
+        imported_objects = cmds.ls("imported:*", long=True)  # Utilisation de * pour récupérer tous les objets sous le namespace importé
         
         if imported_objects:
-            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
+            # Déplacer le modèle sur X pour éviter qu'ils se superposent
             cmds.move(x_offset, 0, 0, imported_objects, relative=True)
             x_offset += 10  # Augmenter l'offset pour le prochain modèle
             
-    cmds.delete('pPlane1', ch=True) 
-    random_scale = minScale + (random.random()* maxScale)
-    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
-    for i in range(nbv):
-        v = random.random()
-        if v<coef:
-            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
-            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
-            cmds.select(cmds.duplicate("imported:" + name_object))
-            cmds.scale(random_scale,random_scale,random_scale)
-            cmds.move(p[0] - 3,p[1] ,p[2])                   
+            # Placer chaque objet importé sur une face aléatoire de pPlane1
+            for obj in imported_objects:
+                cmds.select(obj)
+                duplicate_obj = cmds.duplicate(obj)[0]  # Dupliquer l'objet
+                
+                random_scale = minScale + (random.random() * maxScale)  # Appliquer un facteur d'échelle aléatoire
+                cmds.scale(random_scale, random_scale, random_scale, duplicate_obj)
+                
+                # Choisir une face aléatoire de pPlane1
+                random_face = random.choice(plane_faces)
+                
+                # Récupérer les coordonnées du centre de la face choisie
+                face_position = cmds.xform(random_face, q=True, t=True, ws=True)  # Position de la face en coordonnées mondiales
+                cmds.move(face_position[0], face_position[1], face_position[2], duplicate_obj)  # Déplacer le modèle dupliqué
+                
+                # Optionnel: Appliquer une rotation aléatoire
+                random_rotation = random.uniform(0, 360)
+                cmds.rotate(0, random_rotation, 0, duplicate_obj)  # Rotation aléatoire autour de l'axe Y (par exemple)
 
+    cmds.delete('pPlane1', ch=True)  # Si tu as besoin de supprimer pPlane1 après
 
 
 def generate_ground():
@@ -137,10 +154,11 @@ def generate_ground():
         cmds.polyPlane()
 
     plane_size = 1
-    for section in forestSliders.items():
+    print(forestSliders["ground"])
+    for section, values in forestSliders.items():
         if section == "ground": 
             plane_size = cmds.floatSliderGrp(values["Size"], q=True, value=True)
-            subdivisionAmount = cmds.floatSliderGrp(values["Subdivid"], q=True, value=True)
+            subdividAmount = cmds.floatSliderGrp(values["Subdivid"], q=True, value=True)
     # Mise à l'échelle
     print(plane_size)
     cmds.scale(plane_size, 1, plane_size, ground_obj)
