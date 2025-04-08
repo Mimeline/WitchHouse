@@ -148,7 +148,7 @@ def create_witch_house_ui():
         cmds.setParent("..")
         cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
         cmds.text(label='')
-        cmds.button(label=emoji, w=100,command=f'generate_animal("{item_name}", 10, 1, 2, 0)')
+        cmds.button(label=emoji, w=100,command=f'generate_animal_fixed("{item_name}", 10, 1, 2, 0)')
         cmds.text(label='')
         cmds.setParent("..")
         cmds.separator(height=10, style='double')
