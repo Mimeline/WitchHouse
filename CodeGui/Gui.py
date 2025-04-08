@@ -89,13 +89,8 @@ def create_witch_house_ui():
     house_layout = cmds.scrollLayout(verticalScrollBarThickness=16, horizontalScrollBarThickness=0)
     house_column = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
     cmds.text(label="Generate your house.", align='left', height = 40)
-    cmds.text(label="Modify the size of base:")
-    cmds.floatSliderGrp(label="Length", field=True, minValue=-10, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Height", field=True, minValue=-10, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.floatSliderGrp(label="Width", field=True, minValue=-10, maxValue=10, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.separator(height=10, style='double')
-    
-    sections = ["toit", "porte", "fenetres", "sol", "escalier", "poutres_murs"]
+
+    sections = ["geo","toit", "porte", "fenetres", "sol", "escalier", "poutres_murs"]
     for section in sections:
         cmds.text(label=f"Modify the size of {section}:")
         sliders[section] = {

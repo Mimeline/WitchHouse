@@ -1,222 +1,46 @@
 import maya.cmds as cmds
 import maya.mel
 import random
-import os
-import sys
+import CodeGui
+import CodeRig 
 
-# Ajouter le chemin du dossier racine du projet à sys.path
-current_directory = os.getcwd()  # Obtenir le répertoire courant
-sys.path.append(current_directory)  # Ajouter la racine du projet à sys.path
 
-#import CodeGui
-#import CodeRig 
+def generate_pumpkins(nb_pumpkins, min_scale, max_scale, rotation):
+    coef = 0.3
+    plane_size = 50
 
-ground = None
 
-def generate_house(*args):
-    print("generation de la maison")
-    for section, values in sliders.items():
-        length = cmds.floatSliderGrp(values["length"], q=True, value=True)
-        height = cmds.floatSliderGrp(values["height"], q=True, value=True)
-        width = cmds.floatSliderGrp(values["width"], q=True, value=True)
+    # Définis le dossier où sont stockés les modèles
+    MODE_FOLDER = "Modelisation\Assets décoratifs"  # Remplace par ton chemin
+    
+    # Liste tous les fichiers dans le dossier
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.endswith(('Citrouille.mb'))]
+    for model in model_files:
+        model_path = os.path.join(MODE_FOLDER, model)
         
-        # Appelle la fonction pour scaler chaque partie
-        scaleXYZ(section, length, height, width)
+        # Importer le fichier dans la scène Maya
+        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
     
-    
-def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
-    print("generation de " + name_object)
-    coef = 0.9
-    plane_size = 50
-    minScale = 1
-    maxScale = 1
-    nbObjects = 1
-    rotationAmount = 1
-
-    for section, values in assetsSliders.items():
-        print(section + " " + name_object)
-        if section == name_object:
-            minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
-            maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
-            nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
-            rotationAmount = cmds.floatSliderGrp(values["rotation"], q=True, value=True)
-            print("sliders values", minScale, maxScale, nbObjects, rotationAmount)
-    
-    MODE_FOLDER = "Modelisation/AssetsDecoratifs"  # Utilise / ou échappe les \\
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
-    plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
-
-    for i in range(int(nbObjects)):
-        for model in model_files:
-            model_path = os.path.join(MODE_FOLDER, model)
-            ns = f"{name_object}_inst{i}"
-
-            # Importer avec un namespace unique
-            cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace=ns)
-
-            # Récupérer tous les transforms dans le namespace importé
-            imported_transforms = cmds.ls(f"{ns}:*", type="transform")
-
-            if not imported_transforms:
-                print(f"[!] Aucun transform trouvé dans {ns}")
-                continue
-
-            # Choisir une face aléatoire
-            random_face = random.choice(plane_faces)
-            print("random choice" + random_face)
-            face_position = cmds.xform(random_face, q=True, t=True, ws=True)
-
-            for obj in imported_transforms:
-                # Échelle aléatoire
-                scale = minScale + (random.random() * (maxScale - minScale))
-                cmds.scale(scale, scale, scale, obj)
-
-                # Position
-                cmds.move(face_position[0], face_position[1], face_position[2], obj, absolute=True)
-
-                # Rotation aléatoire (autour de Y)
-                rot = random.uniform(0, rotationAmount)
-                cmds.rotate(0, rot, 0, obj)
-
-    cmds.delete('pPlane1', ch=True)
-
-
-
-
-
-def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation): 
-    print("Génération de " + name_object)
-    coef = 0.2
-    plane_size = 50
-    minScale = 1
-    maxScale = 1
-    nbObjects = 1
-    rotationAmount = 1
-
-    # Récupère les valeurs des sliders
-    for section, values in animalSliders.items():
-        if section == name_object: 
-            minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
-            maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
-            nbObjects = int(cmds.floatSliderGrp(values["amount"], q=True, value=True))
-
-    # Dossier contenant les modèles
-    MODE_FOLDER = "Modelisation"
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
-
-    plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
-
-    for i in range(nbObjects):
-        for model in model_files:
-            model_path = os.path.join(MODE_FOLDER, model)
-
-            # Créer un namespace unique pour chaque import
-            ns = f"{name_object}_inst{i}"
-            cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace=ns)
-
-            # Récupérer le master_CTRL importé
-            ctrl_name = f"{ns}:master_CTRL"
-            if not cmds.objExists(ctrl_name):
-                print(f"{ctrl_name} non trouvé !")
-                continue
-
-            # Appliquer une échelle aléatoire sur le master_CTRL
-            random_scale = minScale + (random.random() * (maxScale - minScale))
-            cmds.scale(random_scale, random_scale, random_scale, ctrl_name)
-
-            # Choisir une face aléatoire
-            random_face = random.choice(plane_faces)
-            face_position = cmds.xform(random_face, q=True, t=True, ws=True)
-
-            # Déplacement et rotation du master_CTRL
-            cmds.move(face_position[0], face_position[1], face_position[2], ctrl_name, absolute=True)
-            random_rotation = random.uniform(0, 360)
-            cmds.rotate(0, random_rotation, 0, ctrl_name)
-
-    cmds.delete('pPlane1', ch=True)
-
-def generate_animated_animal(name_object, nb_objects, min_scale, max_scale, rotation): 
-    print("Génération de " + name_object)
-    coef = 0.2
-    plane_size = 50
-    minScale = 1
-    maxScale = 1
-    nbObjects = 1
-    rotationAmount = 1
-
-    # Récupère les valeurs des sliders
-    for section, values in animalSliders.items():
-        if section == name_object: 
-            minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
-            maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
-            nbObjects = int(cmds.floatSliderGrp(values["amount"], q=True, value=True))
-
-    # Dossier contenant les modèles
-    MODE_FOLDER = "Animation"
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
-
-    plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
-
-    for i in range(nbObjects):
-        for model in model_files:
-            model_path = os.path.join(MODE_FOLDER, model)
-
-            # Créer un namespace unique pour chaque import
-            ns = f"{name_object}_inst{i}"
-            cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace=ns)
-
-            # Récupérer le master_CTRL importé
-            ctrl_name = f"{ns}:master_CTRL"
-            if not cmds.objExists(ctrl_name):
-                print(f"{ctrl_name} non trouvé !")
-                continue
-
-            # Appliquer une échelle aléatoire sur le master_CTRL
-            random_scale = minScale + (random.random() * (maxScale - minScale))
-            cmds.scale(random_scale, random_scale, random_scale, ctrl_name)
-
-            # Choisir une face aléatoire
-            random_face = random.choice(plane_faces)
-            face_position = cmds.xform(random_face, q=True, t=True, ws=True)
-
-            # Déplacement et rotation du master_CTRL
-            cmds.move(face_position[0], face_position[1], face_position[2], ctrl_name, absolute=True)
-            random_rotation = random.uniform(0, 360)
-            cmds.rotate(0, random_rotation, 0, ctrl_name)
-
-    cmds.delete('pPlane1', ch=True)
-
-
-def generate_ground():
-    global shape_radio_collection, round_btn, square_btn
-    print(">> Génération du sol")
-
-    # Vérifier si les boutons radio sont bien définis
-    try:
-        selected_shape = cmds.radioCollection(shape_radio_collection, query=True, select=True)
-        print(f"Forme sélectionnée : {selected_shape}")
-    except:
-        print("Erreur : radioCollection non définie.")
-        return
-
-    # Créer le sol en fonction de la sélection
-    ground_obj = None
-    if selected_shape == 'round_btn':
-        print("creation")
-        cmds.polyDisc()
-    else:
-        cmds.polyPlane()
-
-    plane_size = 1
-    print(forestSliders["ground"])
-    for section, values in forestSliders.items():
-        if section == "ground": 
-            plane_size = cmds.floatSliderGrp(values["Size"], q=True, value=True)
-            subdividAmount = cmds.floatSliderGrp(values["Subdivid"], q=True, value=True)
-    # Mise à l'échelle
-    print(plane_size)
-    cmds.scale(plane_size, 1, plane_size, ground_obj)
-
+        # Récupérer le dernier objet importé
+        imported_objects = cmds.ls(selection=True)
+        
+        if imported_objects:
+            # Déplacer le modèle sur X pour qu'ils ne se superposent pas
+            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
+            x_offset += 10  # Augmenter l'offset pour le prochain modèle
+            
+    cmds.delete('pPlane1', ch=True) 
+    random_scaleX = min_scale + (random.random()* max_scale)
+    random_scaleY = min_scale + (random.random()* max_scale)
+    nbv = len(cmds.ls('pPlane1.vtx[*]',flatten=True))
+    for i in range(nbv):
+        v = random.random()
+        if v<coef:
+            p = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, ws=True)
+            p2 = cmds.xform('pPlane1.f['+str(i)+']', q=True,t=True, r = True)
+            cmds.select(cmds.duplicate('caillou'))
+            cmds.scale(plane_size,0,plane_size)
+            cmds.move(p[0] - 3,p[1] ,p[2])                   
 
 def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     plane_size = 50
@@ -226,6 +50,14 @@ def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     cmds.polyPlane()
     cmds.scale(plane_size,0,plane_size)
     nbv = len(cmds.ls('caillou.vtx[*]',flatten=True))
+    
+    # Selection de vertices dans un boucle
+    """for i in range(nbv):
+        cmds.select('pSphere1.vtx['+str(i)+']')
+        cmds.move(0.000001,0,0, r=True)"""
+    # Connaitre le nombre de vertices d'un objet
+    # avec la fonction len
+    
     
     # Déformation de la sphère
     coef = 20
@@ -253,7 +85,7 @@ def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
     
     cmds.delete('pPlane1', ch=True) 
     random_scaleX = min_scale + (random.random()* max_scale)
-    random_scaleY = min_scale + (random.random()* max_scale)
+    random_scaleY = min_scale + (random.random()* max_scale  )
     for i in range(nbv):
         v = random.random()
         if v<coef:
@@ -262,7 +94,24 @@ def generate_forest(nb_cailloux, min_scale, max_scale, rotation):
             cmds.select(cmds.duplicate('caillou'))
             cmds.move(p[0] - 3,p[1] ,p[2])   
                     
-
+    #creation du feuillage    
+    cmds.polySphere(n = 'feuille', r = 0.2)
+    cmds.scale(0.5,0.09,2)
+    
+    coef = 0.3
+    
+    
+    
+    for i in range(nbv):
+        for k in range(4,7):
+            v = random.random()
+            if v<coef:
+                p = cmds.xform('branche' + str(k) + '.f['+str(i)+']', q=True,t=True, ws=True)
+                p2 = cmds.xform('branche' + str(k) + '.f['+str(i)+']', q=True,t=True, r = True)
+                cmds.select(cmds.duplicate('feuille'))
+                cmds.move(p[0],p[1] ,p[2])   
+                print(random.random())
+                cmds.rotate( random.random() * 1000, random.random() * 1000, random.random() * 1000)
     
 
 def generate_animals():
@@ -298,7 +147,6 @@ myTextures = dict()
 myTextureName = "my_imported_texture"
 nbImportedTexture = 0
 lightInitialPos = 0
-
 def get_new_texture():
     new_texture_path = cmds.fileDialog2(startingDirectory ="/usr/u/bozo/myFiles/")
     return new_texture_path
@@ -320,10 +168,34 @@ def dropdownSelectHousepart():
     return selected_val   
     
 ### SCALING ###
-
-def scaleXYZ(selectedGeo, x_scale, y_scale, z_scale):
-    print("scaling ", selectedGeo, x_scale, y_scale, z_scale )
+"""
+def sliderScaleX( selectedGeo ):
     cmds.select( selectedGeo )
+    Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
+    cmds.scale(Largeur, 1, 1)
+    print(Largeur)
+    
+def sliderScaleY( selectedGeo ):
+    cmds.select( selectedGeo )
+    Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
+    cmds.scale(1, Hauteur, 1)
+    print(Hauteur)
+    
+def sliderScaleZ( selectedGeo ):
+    cmds.select( selectedGeo )
+    Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
+    cmds.scale(1, 1, Longueur)
+    print(Longueur)
+"""    
+def scaleXYZ(selectedGeo, x_scale, y_scale, z_scale):
+    print("scaling")
+    cmds.select( selectedGeo )
+    """
+    Hauteur = cmds.floatSliderGrp(slider_Hauteur, query=True, value=True)
+    Longueur = cmds.floatSliderGrp(slider_Largeur, q=True,v=True)
+    Largeur = cmds.floatSliderGrp(slider_Longueur, q=True,v=True)
+    """
+    
     cmds.scale(x_scale, y_scale, z_scale)
     
 
@@ -413,8 +285,9 @@ def modifyTexture(textureParam):
             indice += 1
 
 
-#create_witch_house_ui()
-
+create_witch_house_ui()
+#generate_forest()      
+#generate_animals()  
 print(get_vertex_positions("sol"))
         
 #INTERFACE
