@@ -41,7 +41,7 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
             nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
             rotationAmount = cmds.floatSliderGrp(values["rotation"], q=True, value=True)
             print("sliders values", minScale, maxScale, nbObjects, rotationAmount)
-
+    
     MODE_FOLDER = "Modelisation/AssetsDecoratifs"  # Utilise / ou échappe les \\
     model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
     plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
@@ -135,6 +135,56 @@ def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation):
 
     cmds.delete('pPlane1', ch=True)
 
+def generate_animated_animal(name_object, nb_objects, min_scale, max_scale, rotation): 
+    print("Génération de " + name_object)
+    coef = 0.2
+    plane_size = 50
+    minScale = 1
+    maxScale = 1
+    nbObjects = 1
+    rotationAmount = 1
+
+    # Récupère les valeurs des sliders
+    for section, values in animalSliders.items():
+        if section == name_object: 
+            minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
+            maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
+            nbObjects = int(cmds.floatSliderGrp(values["amount"], q=True, value=True))
+
+    # Dossier contenant les modèles
+    MODE_FOLDER = "Animation"
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
+
+    plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
+
+    for i in range(nbObjects):
+        for model in model_files:
+            model_path = os.path.join(MODE_FOLDER, model)
+
+            # Créer un namespace unique pour chaque import
+            ns = f"{name_object}_inst{i}"
+            cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace=ns)
+
+            # Récupérer le master_CTRL importé
+            ctrl_name = f"{ns}:master_CTRL"
+            if not cmds.objExists(ctrl_name):
+                print(f"{ctrl_name} non trouvé !")
+                continue
+
+            # Appliquer une échelle aléatoire sur le master_CTRL
+            random_scale = minScale + (random.random() * (maxScale - minScale))
+            cmds.scale(random_scale, random_scale, random_scale, ctrl_name)
+
+            # Choisir une face aléatoire
+            random_face = random.choice(plane_faces)
+            face_position = cmds.xform(random_face, q=True, t=True, ws=True)
+
+            # Déplacement et rotation du master_CTRL
+            cmds.move(face_position[0], face_position[1], face_position[2], ctrl_name, absolute=True)
+            random_rotation = random.uniform(0, 360)
+            cmds.rotate(0, random_rotation, 0, ctrl_name)
+
+    cmds.delete('pPlane1', ch=True)
 
 
 def generate_ground():

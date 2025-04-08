@@ -162,19 +162,25 @@ def create_witch_house_ui():
     
     # Tab 5: Animation
     animation_layout = cmds.columnLayout(adjustableColumn=True, rowSpacing=10)
-    cmds.text(label="Animate your dog?")
-    cmds.floatSliderGrp(label="Duration", field=True, minValue=0, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)])
-    cmds.rowLayout(numberOfColumns=1, columnAlign=(1, "center"))
-    cmds.setParent("..")
-    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
-    cmds.text(label='')
-    cmds.button(label="🐕", w=100)
-    cmds.text(label='')
-    cmds.setParent("..")
-    cmds.separator(height=10, style='double')
-    cmds.text(label="Etc......")
+    items = [("generate a animated bear?", "🐻", "Bear_Anim"), ("generate a animated Cat_Anim?", "🐱", "chat"), ("generate an animated bunny?", "🐰", "Bunny_Anim"), ("generate an animated fox?", "🦊", "Fox_Anim")]
+    for label, emoji, item_name in items:
+        cmds.text(label=label, align='left')
+        animalSliders[item_name] = {
+        "amount": cmds.floatSliderGrp(label="Amount", field=True, minValue=1, maxValue=100, value=50, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "minScale": cmds.floatSliderGrp(label="Min scale", field=True, minValue=1, maxValue=5, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        "maxScale": cmds.floatSliderGrp(label="Max scale", field=True, minValue=1, maxValue=5, value=1, columnWidth=[(1, 120), (2, 50), (3, 200)]),
+        }
+        
+        cmds.rowLayout(numberOfColumns=1, columnAlign=(1, "center"))
+        cmds.setParent("..")
+        cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,150),(2,100),(3,150)])  
+        cmds.text(label='')
+        cmds.button(label=emoji, w=100,command=f'generate_animated_animal("{item_name}", 10, 1, 2, 0)')
+        cmds.text(label='')
+        cmds.setParent("..")
+        cmds.separator(height=10, style='double')
     cmds.text(label="MaririEmimiVanessaEloé - 2025", align="center")
-    cmds.setParent("..")  # Exit animation_layout
+    cmds.setParent("..")  # Exit animals_layout
     
     # Add tabs
     cmds.tabLayout(tabs, edit=True, tabLabel=[
