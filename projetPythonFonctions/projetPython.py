@@ -70,67 +70,56 @@ def generate_object(name_object, nb_objects, min_scale, max_scale, rotation):
 
 
 def generate_animal(name_object, nb_objects, min_scale, max_scale, rotation): 
-    print("generation de " + name_object)
+    print("Génération de " + name_object)
     coef = 0.2
     plane_size = 50
     minScale = 1
     maxScale = 1
     nbObjects = 1
     rotationAmount = 1
-    
+
+    # Récupère les valeurs des sliders
     for section, values in animalSliders.items():
-        print(section + " " + name_object)
         if section == name_object: 
             minScale = cmds.floatSliderGrp(values["minScale"], q=True, value=True)
             maxScale = cmds.floatSliderGrp(values["maxScale"], q=True, value=True)
-            nbObjects = cmds.floatSliderGrp(values["amount"], q=True, value=True)
-            print("sliders values " + str(minScale) + " " + str(maxScale) + " " + str(nbObjects) + " " + str(rotationAmount))
-    
-    # Définir le dossier où sont stockés les modèles
-    MODE_FOLDER = "Modelisation"  # Remplace par ton chemin
-    
-    # Liste tous les fichiers dans le dossier
-    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith((name_object + ".mb"))]
+            nbObjects = int(cmds.floatSliderGrp(values["amount"], q=True, value=True))
 
-    x_offset = 0  # Variable d'offset pour déplacer les objets
-    
-    # Récupérer les faces de pPlane1
+    # Dossier contenant les modèles
+    MODE_FOLDER = "Modelisation"
+    model_files = [f for f in os.listdir(MODE_FOLDER) if f.startswith(name_object + ".mb")]
+
     plane_faces = cmds.ls('pPlane1.f[*]', flatten=True)
-    
-    for model in model_files:
-        model_path = os.path.join(MODE_FOLDER, model)
-        
-        # Importer le fichier dans la scène Maya
-        cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace="imported")
-        cmds.move(100,0,0)
-        # Récupérer tous les objets importés sous le namespace "imported:"
-        imported_objects = cmds.ls("imported:*", long=True)  # Utilisation de * pour récupérer tous les objets sous le namespace importé
-        
-        if imported_objects:
-            # Déplacer le modèle sur X pour éviter qu'ils se superposent
-            cmds.move(x_offset, 0, 0, imported_objects, relative=True)
-            x_offset += 10  # Augmenter l'offset pour le prochain modèle
-            
-            # Placer chaque objet importé sur une face aléatoire de pPlane1
-            for obj in imported_objects:
-                cmds.select(obj)
-                duplicate_obj = cmds.duplicate(obj)[0]  # Dupliquer l'objet
-                
-                random_scale = minScale + (random.random() * maxScale)  # Appliquer un facteur d'échelle aléatoire
-                cmds.scale(random_scale, random_scale, random_scale, duplicate_obj)
-                
-                # Choisir une face aléatoire de pPlane1
-                random_face = random.choice(plane_faces)
-                
-                # Récupérer les coordonnées du centre de la face choisie
-                face_position = cmds.xform(random_face, q=True, t=True, ws=True)  # Position de la face en coordonnées mondiales
-                cmds.move(face_position[0], face_position[1], face_position[2], duplicate_obj)  # Déplacer le modèle dupliqué
-                
-                # Optionnel: Appliquer une rotation aléatoire
-                random_rotation = random.uniform(0, 360)
-                cmds.rotate(0, random_rotation, 0, duplicate_obj)  # Rotation aléatoire autour de l'axe Y (par exemple)
 
-    cmds.delete('pPlane1', ch=True)  # Si tu as besoin de supprimer pPlane1 après
+    for i in range(nbObjects):
+        for model in model_files:
+            model_path = os.path.join(MODE_FOLDER, model)
+
+            # Créer un namespace unique pour chaque import
+            ns = f"{name_object}_inst{i}"
+            cmds.file(model_path, i=True, ignoreVersion=True, mergeNamespacesOnClash=False, namespace=ns)
+
+            # Récupérer le master_CTRL importé
+            ctrl_name = f"{ns}:master_CTRL"
+            if not cmds.objExists(ctrl_name):
+                print(f"{ctrl_name} non trouvé !")
+                continue
+
+            # Appliquer une échelle aléatoire sur le master_CTRL
+            random_scale = minScale + (random.random() * (maxScale - minScale))
+            cmds.scale(random_scale, random_scale, random_scale, ctrl_name)
+
+            # Choisir une face aléatoire
+            random_face = random.choice(plane_faces)
+            face_position = cmds.xform(random_face, q=True, t=True, ws=True)
+
+            # Déplacement et rotation du master_CTRL
+            cmds.move(face_position[0], face_position[1], face_position[2], ctrl_name, absolute=True)
+            random_rotation = random.uniform(0, 360)
+            cmds.rotate(0, random_rotation, 0, ctrl_name)
+
+    cmds.delete('pPlane1', ch=True)
+
 
 
 def generate_ground():
